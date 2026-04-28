@@ -1,0 +1,24 @@
+{
+	"configHash": "6c8mxcj4rr0o",
+	"files": {
+		"absolute.config.ts": "5qsg2j7j5y9b",
+		"src/constants.ts": "2ahxcn85urxxi",
+		"src/backend/server.ts": "dr5u568xoo0v",
+		"src/backend/handlers/countHistoryHandlers.ts": "3m8mgby6zyfxm",
+		"src/frontend/styles/colors.ts": "es9k21q6ja39",
+		"src/frontend/utils/edenTreaty.ts": "23azkniy63cd9",
+		"src/frontend/react/pages/ReactExample.tsx": "2pd7t6mcq95y9",
+		"src/frontend/react/components/App.tsx": "gbh3ll476tea",
+		"src/frontend/react/components/ProfilePicture.tsx": "qudulxairug9",
+		"src/frontend/react/components/OAuthLink.tsx": "vzsxycj4hsa1",
+		"src/frontend/react/components/Head.tsx": "gxuqyw614csu",
+		"src/frontend/react/components/Dropdown.tsx": "19q90kw5km7yb",
+		"eslint.config.mjs": "2uz20f6vt3u4t",
+		"package.json": "jjnarzc3oq34",
+		"tsconfig.json": "1e4h7800ce4jx",
+		"src/frontend/htmx/pages/HTMXExample.html": "36n2vfx7fs6zv",
+		"src/frontend/react/styles/react-example.css": "219f2zw0ztwt8",
+		"src/frontend/styles/reset.css": "33d0qgrev3j92",
+		"src/frontend/htmx/styles/htmx-example.css": "b04ogt3pjvhj"
+	}
+}
