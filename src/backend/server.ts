@@ -1,5 +1,10 @@
 import { schema } from '../../db/schema';
+import { AnalyzePage } from '../frontend/react/pages/AnalyzePage';
 import { DashboardIndex } from '../frontend/react/pages/DashboardIndex';
+import {
+	probeUrl,
+	trackUrl
+} from './handlers/analyzeHandlers';
 import {
 	getDashboardData
 } from './handlers/dashboardHandlers';
@@ -47,12 +52,34 @@ const ingestHeaders = t.Object({
 	'x-api-key': t.String({ minLength: 16 })
 });
 
+const analyzeBody = t.Object({
+	url: t.String({ format: 'uri' })
+});
+
+const trackBody = t.Object({
+	url: t.String({ format: 'uri' }),
+	projectId: t.Optional(t.String({ format: 'uuid' })),
+	newProjectName: t.Optional(t.String({ minLength: 1, maxLength: 120 }))
+});
+
 const renderDashboard = async () => {
 	const data = await getDashboardData(db);
 	return handleReactPageRequest(
 		DashboardIndex,
 		asset(manifest, 'DashboardIndexIndex'),
 		{ data, cssPath: undefined }
+	);
+};
+
+const renderAnalyze = async () => {
+	const projects = await db
+		.select({ id: schema.projects.id, name: schema.projects.name })
+		.from(schema.projects)
+		.orderBy(schema.projects.createdAt);
+	return handleReactPageRequest(
+		AnalyzePage,
+		asset(manifest, 'AnalyzePageIndex'),
+		{ projects, cssPath: undefined }
 	);
 };
 
@@ -73,6 +100,26 @@ const server = new Elysia()
 		},
 		{ body: ingestBody, headers: ingestHeaders }
 	)
+	.post(
+		'/api/analyze',
+		async ({ body }) => probeUrl(body.url),
+		{ body: analyzeBody }
+	)
+	.post(
+		'/api/track-url',
+		async ({ body, set }) => {
+			const result = await trackUrl(db, body.url, {
+				projectId: body.projectId,
+				newProjectName: body.newProjectName
+			});
+			if ('error' in result) {
+				set.status = result.error === 'project not found' ? 404 : 400;
+				return result;
+			}
+			return result;
+		},
+		{ body: trackBody }
+	)
 	.get(
 		'/api/status/fragment',
 		async ({ query, set }) => {
@@ -87,6 +134,7 @@ const server = new Elysia()
 	)
 	.get('/', () => renderDashboard())
 	.get('/dashboard', () => renderDashboard())
+	.get('/analyze', () => renderAnalyze())
 	.get('/status', () => handleHTMXPageRequest(asset(manifest, 'StatusPage')))
 	.use(networking)
 	.on('error', (err) => {

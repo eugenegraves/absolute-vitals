@@ -31,6 +31,7 @@ export type ProjectDashboard = {
 
 export type DashboardData = {
 	projects: ProjectDashboard[];
+	totalEvents24h: number;
 	generatedAt: number;
 };
 
@@ -157,5 +158,14 @@ export const getDashboardData = async (db: Db): Promise<DashboardData> => {
 		result.push({ ...p, perMetric, uptime });
 	}
 
-	return { projects: result, generatedAt: Date.now() };
+	const [totals] = await db
+		.select({ count: sql<number>`count(*)::int` })
+		.from(schema.events)
+		.where(gte(schema.events.recordedAt, since24h));
+
+	return {
+		projects: result,
+		totalEvents24h: totals?.count ?? 0,
+		generatedAt: Date.now()
+	};
 };
