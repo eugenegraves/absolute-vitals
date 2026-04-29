@@ -17,7 +17,13 @@ const escapeHtml = (s: string) =>
 			}) as Record<string, string>)[c]!
 	);
 
-export const getStatusFragment = async (db: Db, projectId: string) => {
+export const getStatusFragment = async (db: Db, projectId?: string) => {
+	if (!projectId || projectId.length !== 36) {
+		return `<div class="flex items-center gap-3 text-white p-4 rounded-lg shadow bg-slate-400">
+	<span class="font-semibold tracking-wide">Enter a project ID above</span>
+</div>`;
+	}
+
 	const since = new Date(Date.now() - 15 * 60_000);
 	const rows = await db
 		.select({ ok: schema.events.ok })

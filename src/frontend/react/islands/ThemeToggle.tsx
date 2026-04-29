@@ -3,13 +3,23 @@ import { useEffect, useState } from 'react';
 type Theme = 'light' | 'dark';
 const STORAGE_KEY = 'av-theme';
 
-const readInitialTheme = (): Theme => {
-	if (typeof document === 'undefined') return 'dark';
-	return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
-};
-
 export const ThemeToggle = () => {
-	const [theme, setTheme] = useState<Theme>(readInitialTheme);
+	const [theme, setTheme] = useState<Theme>('dark');
+
+	useEffect(() => {
+		const stored = (() => {
+			try {
+				const value = localStorage.getItem(STORAGE_KEY);
+				return value === 'light' || value === 'dark' ? value : null;
+			} catch {
+				return null;
+			}
+		})();
+		const fromDom =
+			document.documentElement.dataset.theme === 'light' ? 'light' : null;
+		const actual: Theme = stored ?? fromDom ?? 'dark';
+		if (actual !== 'dark') setTheme(actual);
+	}, []);
 
 	useEffect(() => {
 		if (theme === 'light') {

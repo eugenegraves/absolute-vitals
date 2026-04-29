@@ -1,14 +1,11 @@
 import { Island } from '@absolutejs/absolute/react';
 import { Head } from '../components/Head';
 
-type ProjectOption = { id: string; name: string };
-
 type AnalyzePageProps = {
-	projects: ProjectOption[];
 	cssPath?: string;
 };
 
-export const AnalyzePage = ({ projects, cssPath }: AnalyzePageProps) => (
+export const AnalyzePage = ({ cssPath }: AnalyzePageProps) => (
 	<html lang="en">
 		<Head cssPath={cssPath} title="AbsoluteVitals · Analyze" />
 		<body>
@@ -36,16 +33,13 @@ export const AnalyzePage = ({ projects, cssPath }: AnalyzePageProps) => (
 						<h1 className="hero__title">Analyze any URL</h1>
 						<p className="hero__subtitle">
 							Run a synthetic probe to measure TTFB, response time, status,
-							body size, content encoding, and basic SEO meta tags. Optionally
-							save the result to a project for ongoing tracking.
+							body size, content encoding, and basic SEO meta tags. The URL
+							is automatically tracked and you'll be taken to the dashboard
+							to see its metrics.
 						</p>
 					</section>
 
-					<Island
-						component="AnalyzeForm"
-						framework="react"
-						props={{ projects }}
-					/>
+					<Island component="AnalyzeForm" framework="react" props={{}} />
 				</div>
 			</main>
 		</body>

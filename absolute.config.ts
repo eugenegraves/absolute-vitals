@@ -4,7 +4,10 @@ export default defineConfig({
 	assetsDirectory: 'src/backend/assets',
 	buildDirectory: 'build',
 	htmxDirectory: 'src/frontend/htmx',
-	islands: { registry: 'src/frontend/react/islands/registry.ts' },
+	islands: {
+		bootstrap: 'src/frontend/react/client/Bootstrap.tsx',
+		registry: 'src/frontend/react/islands/registry.ts'
+	},
 	publicDirectory: 'public',
 	reactDirectory: 'src/frontend/react'
 });

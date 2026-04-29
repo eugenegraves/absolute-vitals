@@ -1,5 +1,6 @@
 import { schema } from '../../db/schema';
 import { AnalyzePage } from '../frontend/react/pages/AnalyzePage';
+
 import { DashboardIndex } from '../frontend/react/pages/DashboardIndex';
 import {
 	probeUrl,
@@ -62,26 +63,25 @@ const trackBody = t.Object({
 	newProjectName: t.Optional(t.String({ minLength: 1, maxLength: 120 }))
 });
 
-const renderDashboard = async () => {
+const renderDashboard = async (selectedProjectId?: string) => {
 	const data = await getDashboardData(db);
 	return handleReactPageRequest(
 		DashboardIndex,
 		asset(manifest, 'DashboardIndexIndex'),
-		{ data, cssPath: undefined }
+		{ data, selectedProjectId, cssPath: undefined }
 	);
 };
 
-const renderAnalyze = async () => {
-	const projects = await db
-		.select({ id: schema.projects.id, name: schema.projects.name })
-		.from(schema.projects)
-		.orderBy(schema.projects.createdAt);
-	return handleReactPageRequest(
+const renderAnalyze = async () =>
+	handleReactPageRequest(
 		AnalyzePage,
 		asset(manifest, 'AnalyzePageIndex'),
-		{ projects, cssPath: undefined }
+		{ cssPath: undefined }
 	);
-};
+
+const dashboardQuery = t.Object({
+	projectId: t.Optional(t.String({ format: 'uuid' }))
+});
 
 const server = new Elysia()
 	.use(absolutejs)
@@ -128,12 +128,16 @@ const server = new Elysia()
 		},
 		{
 			query: t.Object({
-				projectId: t.String({ format: 'uuid' })
+				projectId: t.Optional(t.String())
 			})
 		}
 	)
-	.get('/', () => renderDashboard())
-	.get('/dashboard', () => renderDashboard())
+	.get('/', ({ query }) => renderDashboard(query.projectId), {
+		query: dashboardQuery
+	})
+	.get('/dashboard', ({ query }) => renderDashboard(query.projectId), {
+		query: dashboardQuery
+	})
 	.get('/analyze', () => renderAnalyze())
 	.get('/status', () => handleHTMXPageRequest(asset(manifest, 'StatusPage')))
 	.use(networking)

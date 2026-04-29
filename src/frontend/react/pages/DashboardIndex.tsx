@@ -8,6 +8,7 @@ import type {
 
 type DashboardIndexProps = {
 	data: DashboardData;
+	selectedProjectId?: string;
 	cssPath?: string;
 };
 
@@ -124,9 +125,13 @@ const STATUS_COPY: Record<Status, { title: string; sub: string }> = {
 const formatUptime = (rate: number | null) =>
 	rate === null ? '—' : `${(rate * 100).toFixed(1)}%`;
 
-export const DashboardIndex = ({ data, cssPath }: DashboardIndexProps) => {
+export const DashboardIndex = ({ data, selectedProjectId, cssPath }: DashboardIndexProps) => {
 	const status = globalStatus(data);
 	const copy = STATUS_COPY[status];
+
+	const displayProjects = selectedProjectId
+		? data.projects.filter((p) => p.id === selectedProjectId)
+		: data.projects;
 
 	return (
 		<html lang="en">
@@ -191,7 +196,33 @@ export const DashboardIndex = ({ data, cssPath }: DashboardIndexProps) => {
 							</div>
 						)}
 
-						{data.projects.map((project) => {
+						{data.projects.length > 0 && (
+							<div className="row" style={{ flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+								<a
+									href="/dashboard"
+									className={`btn ${!selectedProjectId ? '' : 'btn--ghost'}`}
+									style={{ padding: '4px 12px', fontSize: 13 }}
+								>
+									Overview
+								</a>
+								{data.projects.map((p) => {
+									const ps = projectStatus(p);
+									return (
+										<a
+											key={p.id}
+											href={`/dashboard?projectId=${p.id}`}
+											className={`btn ${selectedProjectId === p.id ? '' : 'btn--ghost'}`}
+											style={{ padding: '4px 12px', fontSize: 13, gap: 6 }}
+										>
+											<span className={`health-dot health-dot--${ps}`} style={{ width: 8, height: 8 }} />
+											{p.name}
+										</a>
+									);
+								})}
+							</div>
+						)}
+
+						{displayProjects.map((project) => {
 							const ps = projectStatus(project);
 							return (
 								<section className="card" key={project.id}>

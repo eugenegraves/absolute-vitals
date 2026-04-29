@@ -1,6 +1,9 @@
 import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { eq } from 'drizzle-orm';
 import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
+import { chromium, type Browser } from 'playwright';
 import { schema, type SchemaType } from '../../../db/schema';
 
 type Db = BunSQLDatabase<SchemaType>;
@@ -8,6 +11,10 @@ type Db = BunSQLDatabase<SchemaType>;
 export type AnalyzeResult = {
 	url: string;
 	ttfbMs: number;
+	lcpMs: number | null;
+	fcpMs: number | null;
+	inpMs: number | null;
+	cls: number | null;
 	totalMs: number;
 	statusCode: number;
 	ok: boolean;
@@ -20,36 +27,50 @@ export type AnalyzeResult = {
 	error?: string;
 };
 
-const TIMEOUT_MS = 10_000;
-const MAX_BODY_BYTES = 2_000_000;
+const TIMEOUT_MS = 30_000;
 const USER_AGENT = 'AbsoluteVitals-Probe/1.0';
 
-const decodeEntities = (s: string) =>
-	s
-		.replace(/&amp;/g, '&')
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'")
-		.replace(/&nbsp;/g, ' ');
+const WEB_VITALS_IIFE = readFileSync(
+	resolve(
+		process.cwd(),
+		'node_modules/web-vitals/dist/web-vitals.iife.js'
+	),
+	'utf-8'
+);
 
-const extractTitle = (html: string): string | null => {
-	const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-	if (!match) return null;
-	const value = match[1]?.trim() ?? '';
-	return value.length > 0 ? decodeEntities(value).slice(0, 300) : null;
-};
+const REPORTER_SCRIPT = `${WEB_VITALS_IIFE}
+;(function() {
+	if (typeof webVitals === 'undefined') return;
+	const send = (name) => (m) => {
+		if (typeof window.__abReportVital === 'function') {
+			try { window.__abReportVital(name, m.value); } catch (e) {}
+		}
+	};
+	webVitals.onLCP(send('lcp'), { reportAllChanges: true });
+	webVitals.onFCP(send('fcp'));
+	webVitals.onTTFB(send('ttfb'));
+	webVitals.onCLS(send('cls'), { reportAllChanges: true });
+	webVitals.onINP(send('inp'), { reportAllChanges: true });
+})();`;
 
-const extractDescription = (html: string): string | null => {
-	const re =
-		/<meta\b[^>]*\bname\s*=\s*['"]description['"][^>]*\bcontent\s*=\s*['"]([^'"]*)['"]/i;
-	const reReversed =
-		/<meta\b[^>]*\bcontent\s*=\s*['"]([^'"]*)['"][^>]*\bname\s*=\s*['"]description['"]/i;
-	const match = html.match(re) ?? html.match(reReversed);
-	if (!match) return null;
-	const value = match[1]?.trim() ?? '';
-	return value.length > 0 ? decodeEntities(value).slice(0, 500) : null;
-};
+const errorResult = (rawUrl: string, message: string): AnalyzeResult => ({
+	url: rawUrl,
+	ttfbMs: 0,
+	lcpMs: null,
+	fcpMs: null,
+	inpMs: null,
+	cls: null,
+	totalMs: 0,
+	statusCode: 0,
+	ok: false,
+	bodyBytes: 0,
+	contentEncoding: null,
+	contentType: null,
+	title: null,
+	description: null,
+	fetchedAt: Date.now(),
+	error: message
+});
 
 export const probeUrl = async (rawUrl: string): Promise<AnalyzeResult> => {
 	const fetchedAt = Date.now();
@@ -57,120 +78,115 @@ export const probeUrl = async (rawUrl: string): Promise<AnalyzeResult> => {
 	try {
 		parsed = new URL(rawUrl);
 	} catch {
-		return {
-			url: rawUrl,
-			ttfbMs: 0,
-			totalMs: 0,
-			statusCode: 0,
-			ok: false,
-			bodyBytes: 0,
-			contentEncoding: null,
-			contentType: null,
-			title: null,
-			description: null,
-			fetchedAt,
-			error: 'invalid url'
-		};
+		return errorResult(rawUrl, 'invalid url');
 	}
 	if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-		return {
-			url: rawUrl,
-			ttfbMs: 0,
-			totalMs: 0,
-			statusCode: 0,
-			ok: false,
-			bodyBytes: 0,
-			contentEncoding: null,
-			contentType: null,
-			title: null,
-			description: null,
-			fetchedAt,
-			error: 'only http and https urls are supported'
-		};
+		return errorResult(rawUrl, 'only http and https urls are supported');
 	}
 
-	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+	let browser: Browser | null = null;
+	const t0 = Date.now();
 
 	try {
-		const t0 = performance.now();
-		const res = await fetch(parsed, {
-			signal: controller.signal,
-			redirect: 'follow',
-			headers: { 'user-agent': USER_AGENT, accept: 'text/html,*/*' }
+		browser = await chromium.launch({ headless: true });
+		const context = await browser.newContext({
+			ignoreHTTPSErrors: true,
+			viewport: { width: 1280, height: 800 }
 		});
-		const ttfbMs = performance.now() - t0;
+		const page = await context.newPage();
 
-		const contentType = res.headers.get('content-type');
-		let bodyBytes = 0;
-		let bodyText = '';
-		const reader = res.body?.getReader();
-		if (reader) {
-			const decoder = new TextDecoder('utf-8', { fatal: false });
-			let truncated = false;
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				if (!value) continue;
-				bodyBytes += value.byteLength;
-				if (!truncated) {
-					if (bodyBytes <= MAX_BODY_BYTES) {
-						bodyText += decoder.decode(value, { stream: true });
-					} else {
-						const allow = Math.max(0, MAX_BODY_BYTES - (bodyBytes - value.byteLength));
-						if (allow > 0) {
-							bodyText += decoder.decode(value.subarray(0, allow), {
-								stream: true
-							});
-						}
-						truncated = true;
-						await reader.cancel().catch(() => undefined);
-						break;
-					}
+		const metrics: Record<string, number> = {};
+		await page.exposeFunction(
+			'__abReportVital',
+			(name: string, value: number) => {
+				if (typeof value === 'number' && Number.isFinite(value)) {
+					metrics[name] = value;
 				}
 			}
-		}
-		const totalMs = performance.now() - t0;
+		);
 
-		const isHtml = (contentType ?? '').toLowerCase().includes('text/html');
-		const title = isHtml ? extractTitle(bodyText) : null;
-		const description = isHtml ? extractDescription(bodyText) : null;
+		await page.addInitScript({ content: REPORTER_SCRIPT });
+
+		const response = await page.goto(parsed.toString(), {
+			waitUntil: 'load',
+			timeout: TIMEOUT_MS
+		});
+
+		if (!response) {
+			throw new Error('no response');
+		}
+
+		const statusCode = response.status();
+		const headers = response.headers();
+		const contentType = headers['content-type'] ?? null;
+		const contentEncoding = headers['content-encoding'] ?? null;
+
+		let bodyBytes = 0;
+		try {
+			const body = await response.body();
+			bodyBytes = body.byteLength;
+		} catch {
+			/* not always available — keep 0 */
+		}
+
+		try {
+			await page.click('body', { timeout: 1500, force: true });
+		} catch {
+			/* page may not be interactable; INP just stays null */
+		}
+
+		await page.waitForTimeout(2500);
+
+		await page.evaluate(() => {
+			window.dispatchEvent(new Event('pagehide'));
+			document.dispatchEvent(new Event('visibilitychange'));
+		});
+
+		await page.waitForTimeout(800);
+
+		const title = (await page.title().catch(() => '')) || null;
+		const description = await page
+			.evaluate(() => {
+				const m = document.querySelector('meta[name="description"]');
+				const value = m?.getAttribute('content')?.trim();
+				return value && value.length > 0 ? value.slice(0, 500) : null;
+			})
+			.catch(() => null);
+
+		const totalMs = Date.now() - t0;
 
 		return {
-			url: parsed.toString(),
-			ttfbMs: Math.round(ttfbMs),
-			totalMs: Math.round(totalMs),
-			statusCode: res.status,
-			ok: res.ok,
+			url: response.url(),
+			ttfbMs: metrics.ttfb !== undefined ? Math.round(metrics.ttfb) : 0,
+			lcpMs: metrics.lcp !== undefined ? Math.round(metrics.lcp) : null,
+			fcpMs: metrics.fcp !== undefined ? Math.round(metrics.fcp) : null,
+			inpMs: metrics.inp !== undefined ? Math.round(metrics.inp) : null,
+			cls:
+				metrics.cls !== undefined
+					? Number(metrics.cls.toFixed(4))
+					: null,
+			totalMs,
+			statusCode,
+			ok: statusCode >= 200 && statusCode < 400,
 			bodyBytes,
-			contentEncoding: res.headers.get('content-encoding'),
+			contentEncoding,
 			contentType,
-			title,
+			title: title ? title.slice(0, 300) : null,
 			description,
 			fetchedAt
 		};
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
-		const reason =
-			controller.signal.aborted && message.toLowerCase().includes('abort')
-				? 'request timed out'
-				: message;
+		const reason = message.toLowerCase().includes('timeout')
+			? 'request timed out'
+			: message;
 		return {
-			url: rawUrl,
-			ttfbMs: 0,
-			totalMs: 0,
-			statusCode: 0,
-			ok: false,
-			bodyBytes: 0,
-			contentEncoding: null,
-			contentType: null,
-			title: null,
-			description: null,
+			...errorResult(rawUrl, reason),
 			fetchedAt,
-			error: reason
+			totalMs: Date.now() - t0
 		};
 	} finally {
-		clearTimeout(timeout);
+		await browser?.close().catch(() => undefined);
 	}
 };
 
@@ -219,39 +235,72 @@ export const trackUrl = async (
 		projectName = existing.name;
 		apiKey = existing.apiKey;
 	} else {
-		const name =
-			options.newProjectName?.trim() ||
-			parsed.hostname ||
-			'New project';
 		const origin = `${parsed.protocol}//${parsed.host}`;
-		const newApiKey = randomBytes(24).toString('base64url');
-		const [inserted] = await db
-			.insert(schema.projects)
-			.values({ name, origin, apiKey: newApiKey })
-			.returning({
+		const [existing] = await db
+			.select({
 				id: schema.projects.id,
 				name: schema.projects.name,
 				apiKey: schema.projects.apiKey
-			});
-		if (!inserted) return { error: 'failed to create project' };
-		projectId = inserted.id;
-		projectName = inserted.name;
-		apiKey = inserted.apiKey;
-		created = true;
+			})
+			.from(schema.projects)
+			.where(eq(schema.projects.origin, origin))
+			.limit(1);
+
+		if (existing) {
+			projectId = existing.id;
+			projectName = existing.name;
+			apiKey = existing.apiKey;
+			created = false;
+		} else {
+			const name =
+				options.newProjectName?.trim() ||
+				parsed.hostname ||
+				'New project';
+			const newApiKey = randomBytes(24).toString('base64url');
+			const [inserted] = await db
+				.insert(schema.projects)
+				.values({ name, origin, apiKey: newApiKey })
+				.returning({
+					id: schema.projects.id,
+					name: schema.projects.name,
+					apiKey: schema.projects.apiKey
+				});
+			if (!inserted) return { error: 'failed to create project' };
+			projectId = inserted.id;
+			projectName = inserted.name;
+			apiKey = inserted.apiKey;
+			created = true;
+		}
 	}
 
 	const result = await probeUrl(rawUrl);
+	const recordedAt = new Date(result.fetchedAt);
 
 	if (result.error === undefined && result.statusCode > 0) {
-		await db.insert(schema.events).values({
+		const baseEvent = {
 			projectId,
-			metric: 'ttfb',
-			value: result.ttfbMs,
 			url: result.url,
 			userAgent: USER_AGENT,
-			recordedAt: new Date(result.fetchedAt)
-		});
+			recordedAt
+		};
+		const numericMetrics: Array<{
+			metric: 'lcp' | 'fcp' | 'ttfb' | 'inp' | 'cls';
+			value: number | null;
+		}> = [
+			{ metric: 'ttfb', value: result.ttfbMs },
+			{ metric: 'lcp', value: result.lcpMs },
+			{ metric: 'fcp', value: result.fcpMs },
+			{ metric: 'inp', value: result.inpMs },
+			{ metric: 'cls', value: result.cls }
+		];
+		for (const { metric, value } of numericMetrics) {
+			if (value === null) continue;
+			await db
+				.insert(schema.events)
+				.values({ ...baseEvent, metric, value });
+		}
 	}
+
 	await db.insert(schema.events).values({
 		projectId,
 		metric: 'uptime',
@@ -261,7 +310,7 @@ export const trackUrl = async (
 		ok:
 			result.statusCode >= 200 && result.statusCode < 400 ? true : false,
 		userAgent: USER_AGENT,
-		recordedAt: new Date(result.fetchedAt)
+		recordedAt
 	});
 
 	return { projectId, projectName, apiKey, created, result };
