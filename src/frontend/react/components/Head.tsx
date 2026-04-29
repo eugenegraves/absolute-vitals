@@ -7,10 +7,10 @@ type HeadProps = {
 };
 
 export const Head = ({
-	title = 'AbsoluteJS + React',
-	description = 'AbsoluteJS React Example',
+	title = 'AbsoluteVitals',
+	description = 'Core Web Vitals & uptime analytics',
 	icon = '/assets/ico/favicon.ico',
-	font = 'Poppins',
+	font = 'Inter',
 	cssPath
 }: HeadProps) => (
 	<head>
@@ -29,6 +29,7 @@ export const Head = ({
 			href={`https://fonts.googleapis.com/css2?family=${font}:wght@100..900&display=swap`}
 			rel="stylesheet"
 		/>
+		<script src="https://cdn.tailwindcss.com" />
 		{cssPath && <link href={cssPath} rel="stylesheet" type="text/css" />}
 	</head>
 );
