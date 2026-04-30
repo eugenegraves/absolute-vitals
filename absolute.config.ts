@@ -22,6 +22,19 @@ export default defineConfig({
 			registry: 'src/frontend/react/islands/registry.ts'
 		},
 		publicDirectory: 'public',
-		reactDirectory: 'src/frontend/react'
+		reactDirectory: 'src/frontend/react',
+		// Workaround for Bun minifier identifier-collision bug
+		// (https://github.com/oven-sh/bun/issues/28742) that otherwise
+		// crashes React 19's scheduler with `dU is not a function`.
+		// Keeps whitespace + syntax minification, disables identifier mangling.
+		bunBuild: {
+			default: {
+				minify: {
+					whitespace: true,
+					syntax: true,
+					identifiers: false
+				}
+			}
+		}
 	}
 });

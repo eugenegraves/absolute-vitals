@@ -5,7 +5,7 @@
     "": {
       "name": "absolute-vitals",
       "dependencies": {
-        "@absolutejs/absolute": "0.19.0-beta.704",
+        "@absolutejs/absolute": "0.19.0-beta.765",
         "@elysiajs/eden": "1.4.8",
         "@elysiajs/static": "1.4.7",
         "@elysiajs/swagger": "1.3.1",
@@ -44,19 +44,19 @@
     },
   },
   "packages": {
-    "@absolutejs/absolute": ["@absolutejs/absolute@0.19.0-beta.704", "", { "dependencies": { "@angular/compiler": "^21.0.0", "zustand": "^5.0.12" }, "optionalDependencies": { "@absolutejs/native-darwin-arm64": "0.19.0-beta.704", "@absolutejs/native-darwin-x64": "0.19.0-beta.704", "@absolutejs/native-linux-arm64": "0.19.0-beta.704", "@absolutejs/native-linux-x64": "0.19.0-beta.704", "@absolutejs/native-windows-arm64": "0.19.0-beta.704", "@absolutejs/native-windows-x64": "0.19.0-beta.704" }, "peerDependencies": { "@angular/common": "^21.0.0", "@angular/compiler-cli": "^21.0.0", "@angular/core": "^21.0.0", "@angular/platform-browser": "^21.0.0", "@angular/platform-server": "^21.0.0", "@angular/ssr": "^21.0.0", "bun-plugin-tailwind": "^0.1.2", "elysia": "^1.4.0", "less": "^4.6.0", "postcss": "^8.5.0", "react": "^19.2.0", "react-dom": "^19.2.0", "react-refresh": "^0.18.0", "sass": "^1.99.0", "sharp": ">=0.33.0", "stylus": "^0.64.0", "svelte": "^5.35.2", "tailwindcss": "^4.1.0", "typescript": "^5.9.3", "vue": "^3.5.27", "zone.js": "^0.15.0" }, "optionalPeers": ["@angular/common", "@angular/compiler-cli", "@angular/core", "@angular/platform-browser", "@angular/platform-server", "@angular/ssr", "bun-plugin-tailwind", "less", "postcss", "react", "react-dom", "react-refresh", "sass", "sharp", "stylus", "svelte", "tailwindcss", "typescript", "vue", "zone.js"], "bin": { "absolute": "dist/cli/index.js" } }, "sha512-FjfF2ehUeLbLke4R8lMBZKbY/7rQ4+KHqRVpHbp420WqYaa2S5qunsl6caO4a6TnvCnoB8pShnpUy3Zt5UxLjQ=="],
+    "@absolutejs/absolute": ["@absolutejs/absolute@0.19.0-beta.765", "", { "dependencies": { "@angular/compiler": "^21.0.0", "zustand": "^5.0.12" }, "optionalDependencies": { "@absolutejs/native-darwin-arm64": "0.19.0-beta.765", "@absolutejs/native-darwin-x64": "0.19.0-beta.765", "@absolutejs/native-linux-arm64": "0.19.0-beta.765", "@absolutejs/native-linux-x64": "0.19.0-beta.765", "@absolutejs/native-windows-arm64": "0.19.0-beta.765", "@absolutejs/native-windows-x64": "0.19.0-beta.765" }, "peerDependencies": { "@angular/animations": "^21.0.0", "@angular/common": "^21.0.0", "@angular/compiler-cli": "^21.0.0", "@angular/core": "^21.0.0", "@angular/platform-browser": "^21.0.0", "@angular/platform-server": "^21.0.0", "@angular/router": "^21.0.0", "@angular/ssr": "^21.0.0", "bun-plugin-tailwind": "^0.1.2", "elysia": "^1.4.0", "less": "^4.6.0", "postcss": "^8.5.0", "react": "^19.2.0", "react-dom": "^19.2.0", "react-refresh": "^0.18.0", "sass": "^1.99.0", "sharp": ">=0.33.0", "stylus": "^0.64.0", "svelte": "^5.35.2", "tailwindcss": "^4.1.0", "typescript": "^5.9.3", "vue": "^3.5.27", "zone.js": "^0.15.0" }, "optionalPeers": ["@angular/animations", "@angular/common", "@angular/compiler-cli", "@angular/core", "@angular/platform-browser", "@angular/platform-server", "@angular/router", "@angular/ssr", "bun-plugin-tailwind", "less", "postcss", "react", "react-dom", "react-refresh", "sass", "sharp", "stylus", "svelte", "tailwindcss", "typescript", "vue", "zone.js"], "bin": { "absolute": "dist/cli/index.js" } }, "sha512-5S6WH6M8nJ1sBfUhzLgo8KwIbkeIDyw63m1Td7ByZ+crOSseh6lI8BFPFHe2TySkMtv2ZrYvWC8M/o3HhHoiYg=="],
 
-    "@absolutejs/native-darwin-arm64": ["@absolutejs/native-darwin-arm64@0.19.0-beta.704", "", { "os": "darwin", "cpu": "arm64" }, "sha512-jd+jimSY7xvCXv1r93250bns8GdIUfcpl8zkOgsCXYuWkZN+o0VMeFsNbvWD+CLp05y4dxT8yWje0m1FGS5Xpg=="],
+    "@absolutejs/native-darwin-arm64": ["@absolutejs/native-darwin-arm64@0.19.0-beta.765", "", { "os": "darwin", "cpu": "arm64" }, "sha512-/+4frNmsyAC9rLFYwcDbjmsfaMGaC4VCCDqRAOdo5rd/mCgD5f6hV5sMmXsPIiFERrgbf8IrfLgQhvx2nT2rUQ=="],
 
-    "@absolutejs/native-darwin-x64": ["@absolutejs/native-darwin-x64@0.19.0-beta.704", "", { "os": "darwin", "cpu": "x64" }, "sha512-e5oxCS+1/VO7xKifsqQoAAmuIHNnDb6+P/OBiXHjPW+5RnfU0ydCcbu/9mTk/6JsxATOZmRA+qolVyVGRUClUg=="],
+    "@absolutejs/native-darwin-x64": ["@absolutejs/native-darwin-x64@0.19.0-beta.765", "", { "os": "darwin", "cpu": "x64" }, "sha512-zJxY0B9jJlNhqiq+whRXTdd2QWGNEk9i2aY65OZv98sWAXu0DWyabkOc4KxSlwffd4FYQ6XvZ4/KwL8VMsAanw=="],
 
-    "@absolutejs/native-linux-arm64": ["@absolutejs/native-linux-arm64@0.19.0-beta.704", "", { "os": "linux", "cpu": "arm64" }, "sha512-i0BUdNQKx7nli08+FqKjXBP+5ZsRoM6mckazeobTnx7BcnVO4k6cEob4LgWUV1D9vFaN45RT9L5ZBTJQG5oCuQ=="],
+    "@absolutejs/native-linux-arm64": ["@absolutejs/native-linux-arm64@0.19.0-beta.765", "", { "os": "linux", "cpu": "arm64" }, "sha512-WpDwfSH78TJoqGSlIlT6Zqmz7ovTOxY9bcaz2NbnkJd7CTT8mJrLpS2czZvY4jXqrS2dKsgGl4JJVC8328zDQQ=="],
 
-    "@absolutejs/native-linux-x64": ["@absolutejs/native-linux-x64@0.19.0-beta.704", "", { "os": "linux", "cpu": "x64" }, "sha512-IEG30ja/JTBo+WIAVeADOGYrwe1acs8o6Wb0TqUqsYfKKPXiD6qXdhABv5hMVY1RUtCCEP5qKHxOcg/1oEROVg=="],
+    "@absolutejs/native-linux-x64": ["@absolutejs/native-linux-x64@0.19.0-beta.765", "", { "os": "linux", "cpu": "x64" }, "sha512-hGWnH3zBUR+sxsiW7yoZiZojgmf8b+pUB4WKfWP2pEZaX0YWmJo4nc7BnJ3xvtKBDhtRG1ErFK2lASLcyL6GCA=="],
 
-    "@absolutejs/native-windows-arm64": ["@absolutejs/native-windows-arm64@0.19.0-beta.704", "", { "os": "win32", "cpu": "arm64" }, "sha512-7nl7C7uLRxtaMtbjS0bJD5R6VkhmJ9wJ0iKYgiisIovRbP1KapFEgIG95NuX2UP94JStvy9u2DOXNnJ5XoFHnw=="],
+    "@absolutejs/native-windows-arm64": ["@absolutejs/native-windows-arm64@0.19.0-beta.765", "", { "os": "win32", "cpu": "arm64" }, "sha512-Hbd923ApCH2Ey/gBu6vHp1Zg7DsPnxlYqkPNiuAcovh+DhHewhKFCXWEnGM8e/FH6jeTDgE28SsBeLP0WA1SKg=="],
 
-    "@absolutejs/native-windows-x64": ["@absolutejs/native-windows-x64@0.19.0-beta.704", "", { "os": "win32", "cpu": "x64" }, "sha512-oR9EhvIFSZCjmS8kaNf1CoK7CYqiwzYIvTxjwV6Jf7B0bTsyqFDD737r2A17A8AtyJOpUiQ94EjiJl9itkq51A=="],
+    "@absolutejs/native-windows-x64": ["@absolutejs/native-windows-x64@0.19.0-beta.765", "", { "os": "win32", "cpu": "x64" }, "sha512-ghFnypH4Xf5WcJdj+X6sY8pxeFdPLO9WV65PjBe9CGdGP9kmyYR2dFuK3xsz4YYP+fCPwmX1QjcrRnTlUF9NPQ=="],
 
     "@angular/compiler": ["@angular/compiler@21.2.10", "", { "dependencies": { "tslib": "^2.3.0" } }, "sha512-IrgdFuzzD7NTK3WQaSfowjAPxPbnTqsgR92NsOs5ZaWu3RgLl21dHThNc0BK1KwVwppLUSWmD4qePbcLW71VzQ=="],
 
