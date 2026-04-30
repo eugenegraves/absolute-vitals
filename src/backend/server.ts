@@ -16,7 +16,6 @@ import {
 import { getStatusFragment } from './handlers/statusHandlers';
 import {
 	asset,
-	getEnv,
 	handleHTMXPageRequest,
 	networking,
 	prepare
@@ -29,7 +28,7 @@ import { Elysia, t } from 'elysia';
 
 const { absolutejs, manifest } = await prepare();
 
-const pool = new SQL(getEnv('DATABASE_URL'));
+const pool = new SQL(process.env.DATABASE_URL || 'postgresql://user:password@localhost:5433/database');
 const db = drizzle(pool, { schema });
 
 const ingestBody = t.Object({

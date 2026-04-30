@@ -26,11 +26,7 @@ const main = async () => {
 		process.exit(1);
 	}
 
-	const url = process.env.DATABASE_URL;
-	if (!url) {
-		console.error('DATABASE_URL is not set');
-		process.exit(1);
-	}
+	const url = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5433/database';
 
 	const apiKey = randomBytes(24).toString('base64url');
 
