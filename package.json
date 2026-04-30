@@ -41,7 +41,7 @@
 		"dev": "absolute workspace dev",
 		"format": "absolute prettier --write \"./**/*.{js,ts,css,json,mjs,md,jsx,tsx,html}\"",
 		"lint": "absolute eslint",
-		"start": "absolute start",
+		"start": "ABSOLUTE_WORKSPACE_SERVICE_NAME=app absolute start",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"typecheck": "bun run tsc --noEmit",
 		"db:reset": "docker compose -p postgresql -f db/docker-compose.db.yml down -v",
