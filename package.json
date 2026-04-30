@@ -38,17 +38,13 @@
 	},
 	"name": "absolute-vitals",
 	"scripts": {
-		"dev": "absolute dev",
+		"dev": "absolute workspace dev",
 		"format": "absolute prettier --write \"./**/*.{js,ts,css,json,mjs,md,jsx,tsx,html}\"",
 		"lint": "absolute eslint",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"typecheck": "bun run tsc --noEmit",
-		"db:up": "docker compose -p postgresql -f db/docker-compose.db.yml up -d --wait db",
-		"db:down": "docker compose -p postgresql -f db/docker-compose.db.yml down",
 		"db:reset": "docker compose -p postgresql -f db/docker-compose.db.yml down -v",
 		"db:postgresql": "docker compose -p postgresql -f db/docker-compose.db.yml exec -it db bash -lc 'psql -h localhost -U user -d database'",
-		"predb:postgresql": "bun db:up",
-		"postdb:postgresql": "bun db:down",
 		"db:studio": "drizzle-kit studio",
 		"db:push": "drizzle-kit push"
 	},

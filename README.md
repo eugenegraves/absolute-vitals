@@ -89,10 +89,12 @@ absolute.config.ts               # AbsoluteJS config (islands, dirs)
 ```bash
 bun install
 bunx playwright install chromium      # one-time, if not already cached
-bun db:up                             # start Postgres on :5433
-bun db:push                           # apply Drizzle schema
-cp .env.example .env 2>/dev/null || echo 'DATABASE_URL=postgresql://user:password@localhost:5433/database' > .env
-bun dev                               # http://localhost:3000
+cp .env.example .env                  # optionally override connection string
+bun dev                               # starts Postgres on :5433 and dev server on :3000
+
+# On your first run, you need to apply the database schema.
+# While `bun dev` is running, open a second terminal and run:
+bun db:push
 ```
 
 The dev server runs on `:3000`, Postgres on `:5433`. Both are wired up via `DATABASE_URL` in `.env`.
@@ -143,8 +145,6 @@ bun typecheck         # tsc --noEmit (run rm -rf build first if you've been runn
 bun lint              # ESLint
 bun format            # Prettier --write
 
-bun db:up             # start Postgres container
-bun db:down           # stop the container
 bun db:reset          # drop the volume and start fresh
 bun db:push           # apply Drizzle schema to the running DB
 bun db:studio         # Drizzle Studio
