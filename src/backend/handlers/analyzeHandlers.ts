@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { eq } from 'drizzle-orm';
 import type { BunSQLDatabase } from 'drizzle-orm/bun-sql';
-import { chromium, type Browser } from 'playwright';
+import type { Browser } from 'playwright';
 import { schema, type SchemaType } from '../../../db/schema';
 
 type Db = BunSQLDatabase<SchemaType>;
@@ -88,7 +88,9 @@ export const probeUrl = async (rawUrl: string): Promise<AnalyzeResult> => {
 	const t0 = Date.now();
 
 	try {
-		browser = await chromium.launch({ headless: true });
+		const pwMod = 'playwright';
+		const pw = await import(pwMod);
+		browser = await pw.chromium.launch({ headless: true });
 		const context = await browser.newContext({
 			ignoreHTTPSErrors: true,
 			viewport: { width: 1280, height: 800 }
