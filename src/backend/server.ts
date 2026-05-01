@@ -64,19 +64,19 @@ const trackBody = t.Object({
 
 const renderDashboard = async (selectedProjectId?: string) => {
 	const data = await getDashboardData(db);
-	return handleReactPageRequest(
-		DashboardIndex,
-		asset(manifest, 'DashboardIndexIndex'),
-		{ data, selectedProjectId, cssPath: undefined }
-	);
+	return handleReactPageRequest({
+		Page: DashboardIndex,
+		index: asset(manifest, 'DashboardIndexIndex'),
+		props: { data, selectedProjectId, cssPath: undefined }
+	});
 };
 
 const renderAnalyze = async () =>
-	handleReactPageRequest(
-		AnalyzePage,
-		asset(manifest, 'AnalyzePageIndex'),
-		{ cssPath: undefined }
-	);
+	handleReactPageRequest({
+		Page: AnalyzePage,
+		index: asset(manifest, 'AnalyzePageIndex'),
+		props: { cssPath: undefined }
+	});
 
 const dashboardQuery = t.Object({
 	projectId: t.Optional(t.String({ format: 'uuid' }))
